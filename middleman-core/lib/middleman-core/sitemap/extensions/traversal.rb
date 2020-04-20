@@ -16,6 +16,16 @@ module Middleman
         # @return [Middleman::Sitemap::Resource, nil]
         def parent(_recurse = false)
           max_recursion = @app.config[:max_traversal_recursion] || 99
+
+          # To get the real parent, operate on proxy resource.
+          #
+          # A resources paths correspond to the file names, but we want the
+          # external resource, so we get the locale and stuff.
+          if self.is_a?(Resource)
+            proxy_resource = @store.resources.find{|res| res.respond_to?(:target) && res.target == path}
+            return proxy_resource.parent if proxy_resource
+          end
+
           parent_helper(path, max_recursion)
         end
 
